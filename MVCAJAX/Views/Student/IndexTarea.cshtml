@@ -7,12 +7,12 @@
     <h1 class="text-center">Mantenimiento de Estudiantes</h1>
     <div class="row" style="margin-top:2%">
         <div class="col-md-10">
-            <div class="form-group col-md-4">
-                <input class="form-control" type="text" id="myInput" placeholder="Nombre o apellidos" />
-            </div>
-            <div class="form-group">
-                <button class="btn btn-primary" role="button" id="btnSearch" type="button">BUSCAR</button>
-            </div>
+                <div class="form-group col-md-4">
+                    <input class="form-control" type="text" id="myInput" placeholder="Nombre o apellidos" required />
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary" role="button" id="btnSearch" type="button">BUSCAR</button>
+                </div>
         </div>
         <div class="col-md-2">
             <input class="btn btn-info" type="button" value="Nuevo estudiante" data-toggle="modal" data-target="#myModal" />
@@ -75,14 +75,14 @@
                 foreach (var item in Model)
                 {
                     <tr>
-                        <td align="left" class="producttd">@item.ID</td>
-                        <td align="left" class="producttd">@item.Code</td>
-                        <td align="left" class="producttd">@item.Name</td>
-                        <td align="left" class="producttd">@item.LastName</td>
-                        <td align="left" class="producttd">@item.Address</td>
+                        <td align="left" class="producttd">@item.studentID</td>
+                        <td align="left" class="producttd">@item.studentCode</td>
+                        <td align="left" class="producttd">@item.studentName</td>
+                        <td align="left" class="producttd">@item.studentLastName</td>
+                        <td align="left" class="producttd">@item.studentAddress</td>
                         <td>
-                            <button data-id="@item.ID" class="btn btn-info" id="btnEdit"><i class="glyphicon glyphicon-pencil"></i></button>
-                            <button data-id="@item.ID" class="btn btn-danger" id="btnDelete"><i class="glyphicon glyphicon-trash"></i></button>
+                            <button data-id="@item.studentID" class="btn btn-info" id="btnEdit"><i class="glyphicon glyphicon-pencil"></i></button>
+                            <button data-id="@item.studentID" class="btn btn-danger" id="btnDelete"><i class="glyphicon glyphicon-trash"></i></button>
                         </td>
 
                     </tr>
@@ -112,9 +112,9 @@
                 student.studentLastName = $("#StudentLastName").val();
                 student.studentAddress = $("#StudentAddress").val();
 
-                studentId = $('#StudentId').val();
+                studentID = $('#StudentId').val();
 
-                if (studentId == '') {
+                if (studentID == '') {
                     url = '@Url.Action("createStudent")';
                     data = '{ student: ' + JSON.stringify(student) + '}'
                     InsertOrUpdate(url, data);
@@ -132,7 +132,8 @@
                     }).then((result) => {
                         if (result.value) {
                             url = '@Url.Action("updateStudent")';
-                            data = '{ student: ' + JSON.stringify(student) + ' , id : ' + studentId + ' }';
+                            student.studentID = studentID;
+                            data = '{ student: ' + JSON.stringify(student)+ '}';
                             InsertOrUpdate(url, data);
                                Swal.fire(
                                'Actualizado',
@@ -146,29 +147,32 @@
                 return false;
             });
 
-            $("#btnSearch").click(function () {
+            $("#btnSearch").click(function (e) {
+                e.preventDefault();
                 const query = $("#myInput").val();
 
-                 $("#tblStudent tbody tr").remove();
-                 console.log("QUERY",query);
-                $.ajax({
-                    type: "POST",
-                    url: '@Url.Action("searchStudents")',
-                    dataType: "json",
-                    data: { "query" : query },
-                    success: function (data) {
-                        console.log("Data recived",data);
-                        printData(data);
-                    },
-                    error: function (ex) {
-                        console.log(ex);
-                        //var r = jQuery.parseJSON(ex.responseText);
-
-                        alert("Message: " + r.Message);
-                        alert("StackTrace: " + r.StackTrace);
-                        alert("ExceptionType: " + r.ExceptionType);
-                    }
-                });
+                if (query) {
+                    $("#tblStudent tbody tr").remove();
+                    console.log("QUERY", query);
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("searchStudents")',
+                        dataType: "json",
+                        data: { "query": query },
+                        success: function (data) {
+                            console.log("Data recived", data);
+                            printData(data);
+                        },
+                        error: function (ex) {
+                            console.log(ex);
+                            alert("Message: " + r.Message);
+                            alert("StackTrace: " + r.StackTrace);
+                            alert("ExceptionType: " + r.ExceptionType);
+                        }
+                    });
+                } else {
+                    alert("El campo es requerido");
+                }
                 return false;
             });
         });
@@ -183,8 +187,8 @@
                     success: function () {
                         LoadData();
                     },
-                    error: function () {
-                        alert("Error while inserting data");
+                    error: function (error) {
+                        alert("Error while inserting data", error);
                     }
                 });
         }
@@ -247,8 +251,9 @@
                 $('#myModal').modal('show');
                 $('#modalTitle').text('Editar Estudiante')
                 console.log(data);
-            }).fail(function () {
+            }).fail(function (error) {
                 alert("Error updating student");
+                console.log("ERROR UPDATING STUDENT", error);
             });
         });
 

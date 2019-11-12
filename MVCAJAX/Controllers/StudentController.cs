@@ -3,43 +3,40 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using Domain;
-using Service;
 using MVCAJAX.Models;
+using System.Threading.Tasks;
 
 namespace MVCAJAX.Controllers
 {
     public class StudentController : Controller
     {
-        private StudentService service = new StudentService();
+        Proxy.StudentProxy proxy = new Proxy.StudentProxy();
         // GET: Student
 
         public ActionResult IndexRazor()
         {
-            var model = (from c in service.Get()
-                         select new StudentModel
-                         {
-                             ID = c.studentID,
-                             Address = c.studentAddress,
-                             Name = c.studentName
-                         }).ToList();
-
-            return View(model);
+            var response = Task.Run(() => proxy.GetStudentsAsync());
+            return View(response.Result.listado);
         }
 
+        //public ActionResult IndexTarea()
+        //{
+        //    var model = (from c in service.Get()
+        //                 select new StudentModel
+        //                 {
+        //                     ID = c.studentID,
+        //                     Code = c.studentCode,
+        //                     Name = c.studentName,
+        //                     LastName = c.studentLastName,
+        //                     Address = c.studentAddress,
+        //                 }).ToList();
+
+        //    return View(model);
+        //}
         public ActionResult IndexTarea()
         {
-            var model = (from c in service.Get()
-                         select new StudentModel
-                         {
-                             ID = c.studentID,
-                             Code = c.studentCode,
-                             Name = c.studentName,
-                             LastName = c.studentLastName,
-                             Address = c.studentAddress,
-                         }).ToList();
-
-            return View(model);
+            var response = Task.Run(() => proxy.GetStudentsAsync());
+            return View(response.Result.listado);
         }
         public ActionResult Index()
         {
@@ -47,44 +44,45 @@ namespace MVCAJAX.Controllers
         }
         public JsonResult getStudent(string id)
         {
-            return Json(service.Get(), JsonRequestBehavior.AllowGet);
+            var response = Task.Run(() => proxy.GetStudentsAsync());
+            return Json(response.Result.listado, JsonRequestBehavior.AllowGet);
         }
         [HttpPost]
         public ActionResult studentDetail(int id)
         {
-            return Json(service.GetById(id), JsonRequestBehavior.AllowGet);
+            var response = Task.Run(() => proxy.DetailStudentAsync(id));
+            return Json(response.Result.objeto, JsonRequestBehavior.AllowGet);
         }
+
         [HttpPost]
-        public ActionResult createStudent(Student student)
-        {
-            student.createdAt = DateTime.Now;
-            student.active = true;
-            service.Insert(student);
-            string message = "SUCCESS";
+        public ActionResult createStudent(StudentModel student)
+        {   
+            var response = Task.Run(() => proxy.InsertAsync(student));
+            string message = response.Result.Mensaje;
             return Json(new { Message = message, JsonRequestBehavior.AllowGet });
         }
         [HttpPost]
-        public ActionResult updateStudent(Student student,int id)
+        public ActionResult updateStudent(StudentModel student)
         {
-            student.updateAt = DateTime.Now;
-            service.Update(student,id);
-            string message = "SUCCESS";
+            var response = Task.Run(() => proxy.UpdateAsync(student));
+            string message = response.Result.Mensaje;
             return Json(new { Message = message, JsonRequestBehavior.AllowGet });
         }
         [HttpPost]
         public ActionResult deleteStudent(int id)
         {
-            service.Delete(id);
-            string message = "SUCCESS";
+            var response = Task.Run(() => proxy.DeleteStudentAsync(id));
+            string message = response.Result.Mensaje;
             return Json(new { Message = message, JsonRequestBehavior.AllowGet });
         }
 
         [HttpPost]
         public ActionResult searchStudents(string query)
         {
-
-            return Json(service.SearchStudents(query), JsonRequestBehavior.AllowGet);
-
+            var response = Task.Run(() => proxy.SearchStudentsAsync(query));
+            string message = response.Result.Mensaje;
+            return Json(response.Result.listado, JsonRequestBehavior.AllowGet);
         }
     }
+
 }
