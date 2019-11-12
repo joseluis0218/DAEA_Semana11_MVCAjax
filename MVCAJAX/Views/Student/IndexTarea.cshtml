@@ -91,7 +91,7 @@
             else
             {
 
-                <tr><td colspan="6" class="text-center">No se encontraron registros</td></tr>
+                <tr><td colspan="6" class="text-center">No se encontraron registros. <a id="reloadButton" href="#">Recargar</a></td></tr>
             }
         </tbody>
     </table>
@@ -171,10 +171,21 @@
                         }
                     });
                 } else {
-                    alert("El campo es requerido");
+                    Swal.fire({
+                    title: 'Oops...',
+                    text: "Debe ingresar un nombre o apellido",
+                    type: 'error'
+                    })
                 }
                 return false;
             });
+
+            $('#tblStudent').on('click', '#reloadButton', function () {
+                console.log("gaga");
+                $("#myInput").val('');
+                LoadData();
+
+            })
         });
         //Insert or Update Function
         function InsertOrUpdate(url,data) {
@@ -233,7 +244,7 @@
                 });
 
             } else {
-                rows = "<tr><td colspan='6' class='text-center'>No se encontraron registros</td></tr>";
+                rows = "<tr><td colspan='6' class='text-center'>No se encontraron registros. <a id='reloadButton' href='#'>Recargar</a></td></tr>";
                 $('#tblStudent tbody').append(rows);
             }
         }
