@@ -91,7 +91,7 @@
             else
             {
 
-                <tr><td colspan="6" class="text-center">No se encontraron registros. <a id="reloadButton" href="#">Recargar</a></td></tr>
+                <tr><td colspan="6" class="text-center">No se encontraron registros.</td></tr>
             }
         </tbody>
     </table>
@@ -161,7 +161,16 @@
                         data: { "query": query },
                         success: function (data) {
                             console.log("Data recived", data);
-                            printData(data);
+                            var rows = "";
+                            if (data.length > 0) {
+                                printData(data);
+                                rows = "<tr><td colspan='6' class='text-center'><a id='reloadButton' href='#'>Ver todos</a></td></tr>";
+                            } else {
+                                rows = "<tr><td colspan='6' class='text-center'>No se encontraron registros. <a id='reloadButton' href='#'>Ver todos</a></td></tr>";
+                            }
+
+                            $('#tblStudent tbody').append(rows);
+
                         },
                         error: function (ex) {
                             console.log(ex);
@@ -184,6 +193,7 @@
                 console.log("gaga");
                 $("#myInput").val('');
                 LoadData();
+                $("#reloadButton").remove();
 
             })
         });
@@ -244,7 +254,7 @@
                 });
 
             } else {
-                rows = "<tr><td colspan='6' class='text-center'>No se encontraron registros. <a id='reloadButton' href='#'>Recargar</a></td></tr>";
+                rows = "<tr><td colspan='6' class='text-center'>No se encontraron registros.</td></tr>";
                 $('#tblStudent tbody').append(rows);
             }
         }
